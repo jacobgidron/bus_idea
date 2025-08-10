@@ -19,7 +19,7 @@ def get_bus_list_backend(term):
     res_dict = {}
     for i in res["results"]:
         ent = i["data"]
-        key = f"{ent['agencyName']}-{ent['routeShortName']}: {ent['originCityName']}:{ent["originStationName"]}->{ent['destinationCityName']}:{ent["destinationStationName"]}"
+        key = f"{ent['agencyName']}-{ent['routeShortName']}: {ent['originCityName']}:{ent['originStationName']}->{ent['destinationCityName']}:{ent['destinationStationName']}"
         res_dict[key] = ent["routeId"]
     return res_dict
 
@@ -74,7 +74,7 @@ class ListSelectionExample(QMainWindow):
         line_id = self.line_desc_to_id.get(self.selected_text)
 
         stops_info, line_info, line_ident = map_from_bus_list.bus_data_from_govmap_id(line_id)
-        path = f"{self.selected_text.split(":")[0]}.csv"
+        path = f"{self.selected_text.split(':')[0]}.csv"
         print(map_from_bus_list.write_buss_info_to_csv(stops_info, line_info,line_ident,line_id,path=path))
 
 
