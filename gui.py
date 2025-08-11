@@ -9,6 +9,7 @@ import map_from_bus_list
 
 
 def get_bus_list_backend(term):
+    max_key_len = 0
     res = requests.post("https://www.govmap.gov.il/api/search-service/autocomplete",
               data=json.dumps({"searchText": term,
               "language":"he",
@@ -21,7 +22,8 @@ def get_bus_list_backend(term):
         ent = i["data"]
         key = f"{ent['agencyName']}-{ent['routeShortName']}: {ent['originCityName']}:{ent['originStationName']}->{ent['destinationCityName']}:{ent['destinationStationName']}"
         res_dict[key] = ent["routeId"]
-    return res_dict
+        max_key_len =  len(key) if len(key)>max_key_len else max_key_len
+    return res_dict, max_key_len
 
 
 
@@ -40,7 +42,7 @@ class ListSelectionExample(QMainWindow):
         layout.addWidget(self.line_edit)
 
 
-        self.line_num_button = QPushButton("Click me!")
+        self.line_num_button = QPushButton("Search for bus")
         self.line_num_button.clicked.connect(self.get_bus_list)
 
         self.layout.addWidget(self.line_num_button)
@@ -54,22 +56,25 @@ class ListSelectionExample(QMainWindow):
     def get_bus_list(self):
 
         entered_text = self.line_edit.text()
-        self.line_desc_to_id =  get_bus_list_backend(entered_text.split()[0])
-        print(entered_text.split()[0])
+        self.line_desc_to_id, self.key_len =  get_bus_list_backend(entered_text.split()[0])
+        # print(entered_text.split()[0])
         if self.list_widget is None:
             self.list_widget = QListWidget()
             self.layout.addWidget(self.list_widget)
-                    # Connect the itemSelectionChanged signal to a slot
+
+            # Connect the itemSelectionChanged signal to a slot
             self.list_widget.itemSelectionChanged.connect(self.on_item_selection_changed)
+            self.button = QPushButton("make_csv")
+            self.button.clicked.connect(self.make_csv)
+            self.layout.addWidget(self.button)
         else:
             self.list_widget.clear()
-        
+
         self.list_widget.addItems(self.line_desc_to_id.keys())
+        self.setGeometry(100, 100, self.key_len*7, 300)
 
 
-        self.button = QPushButton("make_csv")
-        self.button.clicked.connect(self.make_csv)
-        self.layout.addWidget(self.button)
+
     def make_csv(self):
         line_id = self.line_desc_to_id.get(self.selected_text)
 
